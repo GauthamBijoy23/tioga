@@ -25,7 +25,7 @@ program testTioga
   integer :: blockid
   logical :: iclip,exists
   integer :: ntypes
-  integer :: nv1,nv2
+  integer :: nv1,nv2,nv3
   real*8 :: t1,t2
   integer :: i,n,m,ib,j,nblocks
   real*8 :: xt(3),rnorm
@@ -73,6 +73,7 @@ program testTioga
   ntypes=1
   nv1=6
   nv2=8
+  nv3=4     !NUMBER OF VERTICES PER TET CELL
   do ib=1,nblocks
    g=>gr(ib)
    if (g%n6 > 0)  then
@@ -81,6 +82,14 @@ program testTioga
    else if (g%n8 > 0) then
     call tioga_registergrid_data_mb(ib,g%bodytag(1),g%nv,g%x,g%iblank,g%nwbc,g%nobc,g%wbcnode,g%obcnode,&
        ntypes,nv2,g%n8,g%ndc8)
+   !-----------------------------------------------------------------------------------------------------
+   !   REGISTERING TET FILE GRID DATA
+   !
+   else if (g%n4 > 0) then
+    call tioga_registergrid_data_mb(ib,g%bodytag(1),g%nv,g%x,g%iblank,g%nwbc,g%nobc,g%wbcnode,g%obcnode,&
+       ntypes,nv3,g%n4,g%ndc4)
+   !
+   !------------------------------------------------------------------------------------------------------
    endif
   enddo
 

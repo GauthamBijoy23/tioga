@@ -168,6 +168,8 @@ do j=1,127
       enddo
       read(a(j+2:k),*) g%nv
    endif
+enddo                               !Split parsing for N and E values into two 
+do j=1,127
    if (a(j:j+1).eq.'E=') then
       k=j+2
      do while(a(k:k).ne.' ')
@@ -176,11 +178,43 @@ do j=1,127
      read(a(j+2:k),*) g%ncells
    endif
 enddo
+!
+open(unit=103, file='../driver/header_debug.txt', status='replace')
+write(103,*) '=== TIOGA Header Debug ==='
+write(103,*) 'Parsed header values:'  
+write(103,*) 'g%nv (N) =', g%nv  
+write(103,*) 'g%ncells (E) =', g%ncells
+close(103)
+!
+g%n4=g%nCells !all cells are tet
 g%n6=0
-g%n8=g%nCells
+g%n8=0
+g%nmax=4 !max nodes per cell = 4
 g%nvar=1
 g%nghost=0
 g%ndof=g%ncells+g%nghost
+!
+open(unit=102, file='../driver/allocation_debug.txt', status='replace')  
+write(102,*) '=== TIOGA Allocation Debug ==='  
+write(102,*) 'Number of nodes (g%nv):', g%nv  
+write(102,*) 'Number of cells (g%ncells):', g%ncells  
+write(102,*) 'Number of tetrahedral cells (g%n4):', g%n4  
+write(102,*) 'Degrees of freedom (g%ndof):', g%ndof  
+write(102,*) 'Number of variables (g%nvar):', g%nvar  
+write(102,*) ''  
+write(102,*) 'Array sizes to be allocated:'  
+write(102,*) 'g%x (coordinates):', 3*g%nv, 'elements'  
+write(102,*) 'g%bodytag:', g%nv, 'elements'  
+write(102,*) 'g%iblank:', g%nv, 'elements'  
+write(102,*) 'g%scal:', g%nvar, 'elements'  
+write(102,*) 'g%xcentroid:', 3*g%ndof, 'elements'  
+write(102,*) 'g%q:', g%nvar*g%nv, 'elements'  
+write(102,*) 'g%dq:', 3*g%nvar*g%nv, 'elements'  
+write(102,*) ''  
+write(102,*) 'Estimated memory usage (bytes):'  
+write(102,*) 'Total double precision arrays:', (3*g%nv + 3*g%ndof + g%nvar*g%nv + 3*g%nvar*g%nv)*8  
+write(102,*) 'Total integer arrays:', (g%nv + g%nv)*4  
+close(102)
 !
 allocate(g%x(3*g%nv),g%bodytag(g%nv),g%iblank(g%nv))
 allocate(g%scal(g%nvar))
@@ -198,44 +232,60 @@ uinf=0.5
 pinf=1/1.4
 !
 do i=1,g%nv
-   read(101,*) g%x(3*i-2),g%x(3*i-1),g%x(3*i),junk,g%bodytag(i) !,qj
+   read(101,*) g%x(3*i-2),g%x(3*i-1),g%x(3*i),g%bodytag(i) !,qj
 enddo
 !
 g%scal=1
 !
-allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
+!allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
+allocate(g%ndc4(4, g%n4))
 !
-g%ndc6=0
-g%ndc8=0
-g%nmax=8
+!g%ndc6=0
+!g%ndc8=0
 !
 ! read prizm connectivity
 !
-m=0
-do i=1,g%n6
- read(101,*) g%ndc6(1,i),g%ndc6(2,i),g%ndc6(3,i),junk,&
-           g%ndc6(4,i),g%ndc6(5,i),g%ndc6(6,i),junk
- m=m+1
- g%xcentroid(3*m-2:3*m)=0.
- do j=1,6
-    g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc6(j,i)-2)*SIXTH
-    g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc6(j,i)-1)*SIXTH
-    g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc6(j,i))*SIXTH
- enddo
-enddo
+!m=0
+!do i=1,g%n6
+! read(101,*) g%ndc6(1,i),g%ndc6(2,i),g%ndc6(3,i),junk,&
+!           g%ndc6(4,i),g%ndc6(5,i),g%ndc6(6,i),junk
+! m=m+1
+! g%xcentroid(3*m-2:3*m)=0.
+! do j=1,6
+!    g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc6(j,i)-2)*SIXTH
+!    g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc6(j,i)-1)*SIXTH
+!    g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc6(j,i))*SIXTH
+! enddo
+!enddo
 !
 ! read hex connectivity
 !
-do i=1,g%n8
-   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
-             g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
-    m=m+1
-    g%xcentroid(3*m-2:3*m)=0.
-    do j=1,8
-       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
-       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
-       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
-    enddo
+!do i=1,g%n8
+!   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
+!             g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
+!    m=m+1
+!    g%xcentroid(3*m-2:3*m)=0.
+!    do j=1,8
+!       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
+!       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
+!       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
+!    enddo
+!enddo
+!
+! read tet connectivity
+!
+m = 0
+do i = 1, g%n4
+   read(101,*) g%ndc4(1,i), g%ndc4(2,i), g%ndc4(3,i), g%ndc4(4,i)
+
+   m = m + 1
+   g%xcentroid(3*m-2:3*m) = 0.0
+
+   do j = 1, 4
+      g%xcentroid(3*m-2) = g%xcentroid(3*m-2) + g%x(3*g%ndc4(j,i)-2)*0.25
+      g%xcentroid(3*m-1) = g%xcentroid(3*m-1) + g%x(3*g%ndc4(j,i)-1)*0.25
+      g%xcentroid(3*m)   = g%xcentroid(3*m)   + g%x(3*g%ndc4(j,i)  )*0.25
+   enddo
 enddo
 !
 ! read wall and overset boundary nodes

@@ -335,7 +335,7 @@ void MeshBlock::writeGridFile(int bid)
   int nvert;
 
   sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"part%s.dat",&(intstring[1]));
+  sprintf(fname,"../build/driver/output/part%s.dat",&(intstring[1])); //Added /tioga/output to output file path
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\"\n");
@@ -419,7 +419,7 @@ void MeshBlock::writeCellFile(int bid)
   int nvert;
 
   sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"cell%s.dat",&(intstring[1]));
+  sprintf(fname,"../build/driver/output/cell%s.dat",&(intstring[1])); //Added tioga to output file path
   fp=fopen(fname,"w");
   fprintf(fp, "TITLE =\"Tioga output\"\n");
   fprintf(fp, "VARIABLES = \"X\"\n");
@@ -523,7 +523,7 @@ void MeshBlock::writeFlowFile(int bid,double *q,int nvar,int type)
     }
   //
   sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"flow%s.dat",&(intstring[1]));
+  sprintf(fname,"../build/driver/output/flow%s.dat",&(intstring[1])); //Added tioga to output file path
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\",\"BTAG\" ");
