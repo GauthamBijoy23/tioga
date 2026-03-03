@@ -136,11 +136,11 @@ program testTioga
   enddo
   enddo
   if (1==0) then
-  do ib=1,nblocks
+   do ib=1,nblocks
    call tioga_getdonorcount(ib,dcount,fcount)
    allocate(receptorInfo(4*dcount))
    allocate(inode(fcount),frac(fcount))
-   !write(6,*) dcount,fcount
+   write(6,*) dcount,fcount
    !
    ! use this API if you need to interpolate the field variables yourself
    !

@@ -179,22 +179,26 @@ do j=1,127
    endif
 enddo
 !
-open(unit=103, file='../driver/header_debug.txt', status='replace')
+!
+open(unit=103, file='../driver/header_debug.txt', status='replace')  ! WRITING to HEADER_DEBUG
 write(103,*) '=== TIOGA Header Debug ==='
 write(103,*) 'Parsed header values:'  
 write(103,*) 'g%nv (N) =', g%nv  
-write(103,*) 'g%ncells (E) =', g%ncells
+write(103,*) 'g%ncells (E) =', g%ncells 
+flush(103)             ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
 close(103)
 !
-g%n4=g%nCells !all cells are tet
+!
+g%n4=0 !all cells are tet, now set to 0
 g%n6=0
-g%n8=0
-g%nmax=4 !max nodes per cell = 4
+g%n8=g%nCells
+g%nmax=8 !max nodes per cell = 8 (HEX)
 g%nvar=1
 g%nghost=0
 g%ndof=g%ncells+g%nghost
 !
-open(unit=102, file='../driver/allocation_debug.txt', status='replace')  
+!
+open(unit=102, file='../driver/allocation_debug.txt', status='replace')  !WRITING TO ALLOCATION_DEBUG  
 write(102,*) '=== TIOGA Allocation Debug ==='  
 write(102,*) 'Number of nodes (g%nv):', g%nv  
 write(102,*) 'Number of cells (g%ncells):', g%ncells  
@@ -214,7 +218,9 @@ write(102,*) ''
 write(102,*) 'Estimated memory usage (bytes):'  
 write(102,*) 'Total double precision arrays:', (3*g%nv + 3*g%ndof + g%nvar*g%nv + 3*g%nvar*g%nv)*8  
 write(102,*) 'Total integer arrays:', (g%nv + g%nv)*4  
+flush (102)                              ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
 close(102)
+!
 !
 allocate(g%x(3*g%nv),g%bodytag(g%nv),g%iblank(g%nv))
 allocate(g%scal(g%nvar))
@@ -237,11 +243,11 @@ enddo
 !
 g%scal=1
 !
-!allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
-allocate(g%ndc4(4, g%n4))
+allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
+!allocate(g%ndc4(4, g%n4))
 !
-!g%ndc6=0
-!g%ndc8=0
+g%ndc6=0
+g%ndc8=0
 !
 ! read prizm connectivity
 !
@@ -258,35 +264,35 @@ allocate(g%ndc4(4, g%n4))
 ! enddo
 !enddo
 !
-! read hex connectivity
-!
-!do i=1,g%n8
-!   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
-!             g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
-!    m=m+1
-!    g%xcentroid(3*m-2:3*m)=0.
-!    do j=1,8
-!       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
-!       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
-!       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
-!    enddo
-!enddo
+ read hex connectivity
+
+do i=1,g%n8
+   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
+             g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
+    m=m+1
+    g%xcentroid(3*m-2:3*m)=0.
+    do j=1,8
+       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
+       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
+       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
+    enddo
+enddo
 !
 ! read tet connectivity
 !
-m = 0
-do i = 1, g%n4
-   read(101,*) g%ndc4(1,i), g%ndc4(2,i), g%ndc4(3,i), g%ndc4(4,i)
-
-   m = m + 1
-   g%xcentroid(3*m-2:3*m) = 0.0
-
-   do j = 1, 4
-      g%xcentroid(3*m-2) = g%xcentroid(3*m-2) + g%x(3*g%ndc4(j,i)-2)*0.25
-      g%xcentroid(3*m-1) = g%xcentroid(3*m-1) + g%x(3*g%ndc4(j,i)-1)*0.25
-      g%xcentroid(3*m)   = g%xcentroid(3*m)   + g%x(3*g%ndc4(j,i)  )*0.25
-   enddo
-enddo
+!m = 0
+!do i = 1, g%n4
+!   read(101,*) g%ndc4(1,i), g%ndc4(2,i), g%ndc4(3,i), g%ndc4(4,i)
+!
+!   m = m + 1
+!   g%xcentroid(3*m-2:3*m) = 0.0
+!
+!   do j = 1, 4
+!      g%xcentroid(3*m-2) = g%xcentroid(3*m-2) + g%x(3*g%ndc4(j,i)-2)*0.25
+!      g%xcentroid(3*m-1) = g%xcentroid(3*m-1) + g%x(3*g%ndc4(j,i)-1)*0.25
+!      g%xcentroid(3*m)   = g%xcentroid(3*m)   + g%x(3*g%ndc4(j,i)  )*0.25
+!   enddo
+!enddo
 !
 ! read wall and overset boundary nodes
 !
@@ -338,7 +344,7 @@ do i=1,g%nv
    endif
 enddo
 !
-do i=1,g%n6
+do i=1,g%n4    !!----changed g%n6 to g%n4--------
   g%xcentroid(3*i)=g%xcentroid(3*i)+0.04
 enddo
 !

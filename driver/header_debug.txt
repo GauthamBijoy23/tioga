@@ -1,4 +1,0 @@
- === TIOGA Header Debug ===
- Parsed header values:
- g%nv (N) =      128965
- g%ncells (E) =      725637
