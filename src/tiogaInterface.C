@@ -234,6 +234,20 @@ extern "C" {
   {
     tg->getDonorInfo(*btag,receptors,indices,frac,dcount);
   }
+  void tioga_getreceptorinfo_(int *btag,int *receptors,int *rcount)
+  {
+    std::vector<int>rvec;
+    tg->getReceptorInfo(rvec);
+    *rcount=rvec.size();
+    for(int i=0;i<*rcount;i++)
+        receptors[i]=rvec[i];
+  }
+//  void tioga_getreceptorcount_(int *rcount)
+//  {
+//    std::vector<int>rvec;
+//    tg->getReceptorInfo(rvec);
+//    *rcount=rvec.size();
+//  }
 
   void tioga_setsymmetry_(int *isym)
   {

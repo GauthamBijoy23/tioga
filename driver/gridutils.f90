@@ -189,10 +189,10 @@ flush(103)             ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
 close(103)
 !
 !
-g%n4=0 !all cells are tet, now set to 0
+g%n4=g%nCells !all cells are tet
 g%n6=0
-g%n8=g%nCells
-g%nmax=8 !max nodes per cell = 8 (HEX)
+g%n8=0
+g%nmax=8
 g%nvar=1
 g%nghost=0
 g%ndof=g%ncells+g%nghost
@@ -243,11 +243,12 @@ enddo
 !
 g%scal=1
 !
-allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
-!allocate(g%ndc4(4, g%n4))
+!allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
+allocate(g%ndc4(4, g%n4))
 !
-g%ndc6=0
-g%ndc8=0
+!g%ndc6=0
+!g%ndc8=0
+g%ndc4=0
 !
 ! read prizm connectivity
 !
@@ -264,35 +265,35 @@ g%ndc8=0
 ! enddo
 !enddo
 !
- read hex connectivity
-
-do i=1,g%n8
-   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
-             g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
-    m=m+1
-    g%xcentroid(3*m-2:3*m)=0.
-    do j=1,8
-       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
-       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
-       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
-    enddo
-enddo
+! read hex connectivity
+!
+!do i=1,g%n8
+!   read(101,*) g%ndc8(1,i),g%ndc8(2,i),g%ndc8(3,i),g%ndc8(4,i),&
+!            g%ndc8(5,i),g%ndc8(6,i),g%ndc8(7,i),g%ndc8(8,i)
+!    m=m+1
+!    g%xcentroid(3*m-2:3*m)=0.
+!    do j=1,8
+!       g%xcentroid(3*m-2)=g%xcentroid(3*m-2)+g%x(3*g%ndc8(j,i)-2)*EIGHTH
+!       g%xcentroid(3*m-1)=g%xcentroid(3*m-1)+g%x(3*g%ndc8(j,i)-1)*EIGHTH
+!       g%xcentroid(3*m)=g%xcentroid(3*m)+g%x(3*g%ndc8(j,i))*EIGHTH
+!    enddo
+!enddo
 !
 ! read tet connectivity
-!
-!m = 0
-!do i = 1, g%n4
-!   read(101,*) g%ndc4(1,i), g%ndc4(2,i), g%ndc4(3,i), g%ndc4(4,i)
-!
-!   m = m + 1
-!   g%xcentroid(3*m-2:3*m) = 0.0
-!
-!   do j = 1, 4
-!      g%xcentroid(3*m-2) = g%xcentroid(3*m-2) + g%x(3*g%ndc4(j,i)-2)*0.25
-!      g%xcentroid(3*m-1) = g%xcentroid(3*m-1) + g%x(3*g%ndc4(j,i)-1)*0.25
-!      g%xcentroid(3*m)   = g%xcentroid(3*m)   + g%x(3*g%ndc4(j,i)  )*0.25
-!   enddo
-!enddo
+
+m = 0
+do i = 1, g%n4
+   read(101,*) g%ndc4(1,i), g%ndc4(2,i), g%ndc4(3,i), g%ndc4(4,i)
+
+   m = m + 1
+   g%xcentroid(3*m-2:3*m) = 0.0
+
+   do j = 1, 4
+      g%xcentroid(3*m-2) = g%xcentroid(3*m-2) + g%x(3*g%ndc4(j,i)-2)*0.25
+      g%xcentroid(3*m-1) = g%xcentroid(3*m-1) + g%x(3*g%ndc4(j,i)-1)*0.25
+      g%xcentroid(3*m)   = g%xcentroid(3*m)   + g%x(3*g%ndc4(j,i)  )*0.25
+   enddo
+enddo
 !
 ! read wall and overset boundary nodes
 !
