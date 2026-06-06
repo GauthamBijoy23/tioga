@@ -1,0 +1,19 @@
+ === TIOGA Allocation Debug ===
+ Number of nodes (g%nv):        1000
+ Number of cells (g%ncells):        4374
+ Number of tetrahedral cells (g%n4):        4374
+ Degrees of freedom (g%ndof):        4374
+ Number of variables (g%nvar):           1
+ 
+ Array sizes to be allocated:
+ g%x (coordinates):        3000 elements
+ g%bodytag:        1000 elements
+ g%iblank:        1000 elements
+ g%scal:           1 elements
+ g%xcentroid:       13122 elements
+ g%q:        1000 elements
+ g%dq:        3000 elements
+ 
+ Estimated memory usage (bytes):
+ Total double precision arrays:      160976
+ Total integer arrays:        8000

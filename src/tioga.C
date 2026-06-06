@@ -508,12 +508,12 @@ void tioga::dataUpdate(int nvar,int interptype, int at_points)
   }
 }
 
-void tioga::writeData(int nvar,int interptype)
+void tioga::writeData(int nvar,int interptype,int timestep)    //incl. timestep (mod1)
 {
   //mb->writeGridFile(myid);
   for(int ib=0;ib<nblocks;ib++) {
      mblocks[ib]->writeFlowFile(100*myid+ib,qblock[ib],nvar,interptype);
-     mblocks[ib]->writeCellFile(100*myid+ib);
+     mblocks[ib]->writeCellFile(100*myid+ib,timestep);         //incl. timestep (mod1)
   }
 }
 

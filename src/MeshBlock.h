@@ -169,7 +169,7 @@ class MeshBlock
 
   void tagBoundary(void);
   
-  void writeGridFile(int bid);
+  void writeGridFile(int bid,int timestep);  //incl. timestep (mod1)
 
   void writeFlowFile(int bid,double *q,int nvar,int type);
   
@@ -279,7 +279,7 @@ class MeshBlock
     check_intersect_p4est=f2;
   }
 
-  void writeCellFile(int);
+  void writeCellFile(int bid, int timestep);  //incl. timestep (mod1)
   void getInternalNodes(void);
   void getExtraQueryPoints(OBB *obb,int *nints,int **intData,int *nreals,
 		      double **realData);

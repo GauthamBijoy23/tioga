@@ -149,11 +149,12 @@ type(grid), intent(inout) :: g
 !
 character*128 :: a
 character*1 :: hash
-integer :: i,junk,j,m,k
-real*8 :: rho,u,v,w,p,e,xx,yy,zz,rhoinf,pinf,uinf,qj
-real*8 :: fac,rsq
+integer :: i,junk,j,m,k,btagTemp
+real*8 :: rho,u,v,w,p,e,xx,yy,zz,rhoinf,pinf,uinf,qj,xmin,ymin,zmin,xtemp,ytemp,ztemp
+real*8 :: fac,rsq,xmax,ymax,zmax
 real*8 :: SIXTH=1./6
 real*8 :: EIGHTH=1./8
+logical :: file_exists
 !
 open(unit=101,file=fname,form='formatted')
 !
@@ -237,10 +238,27 @@ rhoinf=1.
 uinf=0.5
 pinf=1/1.4
 !
+xmin = 1.0d15     ! X,Y,Z min values initalised as very high numbers. MAKE SURE they are high enough.
+ymin = 1.0d15
+zmin = 1.0d15
+xmax = 1.0d-15
+ymax = 1.0d-15
+zmax = 1.0d-15
 do i=1,g%nv
    read(101,*) g%x(3*i-2),g%x(3*i-1),g%x(3*i),g%bodytag(i) !,qj
+   xtemp = g%x(3*i-2)
+   ytemp = g%x(3*i-1)
+   ztemp = g%x(3*i)
+   btagTemp = g%bodytag(i) - 1
+   if (xtemp<xmin) xmin = xtemp     !! ------ Compare each x,y,z value with min and if smaller replace.
+   if (ytemp<ymin) ymin = ytemp
+   if (ztemp<zmin) zmin = ztemp
+   if (xtemp>xmax) xmax = xtemp
+   if (ytemp>ymax) ymax = ytemp
+   if (ztemp>zmax) zmax = ztemp 
 enddo
-!
+print*,"xmax,ymax,zmax,btag",xmax,ymax,zmax,btagTemp
+print*,"xmin,ymin,zmin,btag",xmin,ymin,zmin,btagTemp
 g%scal=1
 !
 !allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
@@ -329,24 +347,29 @@ implicit none
 !
 type(grid) :: g
 !
-integer :: i
+integer :: i,ios
 real*8, save :: t=0
 real*8, save :: period=4.
 !
 ! begin
 !
+open(unit=104, file='../driver/moved_grid.dat', status='replace',iostat=ios)
+if(ios/=0) write(*,*)"Error opening file 104"
 t=t+2*acos(-1.)/period
 do i=1,g%nv
-   if (g%bodytag(i)==1) then
+   if (g%bodytag(i)==2) then
       !
-      ! translate the grid along the z-coordinate
+      ! translate the grid along the x-coordinate
       !
-      g%x(3*i)=g%x(3*i)+0.04 !0.3*sin(t) 
+      !write(*,*)"gbodytag",g%bodytag(i)
+      g%x(3*i-2)=g%x(3*i-2)-0.15 !0.3*sin(t) 
+      write(104,*)g%x(3*i-2),g%x(3*i-1),g%x(3*i)
    endif
 enddo
+close(104)
 !
 do i=1,g%n4    !!----changed g%n6 to g%n4--------
-  g%xcentroid(3*i)=g%xcentroid(3*i)+0.04
+  g%xcentroid(3*i-2)=g%xcentroid(3*i-2)-0.15
 enddo
 !
 return

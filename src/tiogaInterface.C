@@ -208,7 +208,7 @@ extern "C" {
     tioga_dataupdate_mb_(nvar,itype);
   }
 
-  void tioga_writeoutputfiles_(int *nvar,char *itype)
+  void tioga_writeoutputfiles_(int *nvar,char *itype, int *timestep)  //included timestep (mod1)
   {
     int interptype;
     if (strstr(itype,"row")) 
@@ -224,7 +224,7 @@ extern "C" {
 	printf("#tiogaInterface.C:dataupdate_:unknown data orientation\n");
 	return;
       }
-    tg->writeData(*nvar,interptype);
+    tg->writeData(*nvar,interptype,*timestep);               //incl. timestep (mod1)
   }    
   void tioga_getdonorcount_(int *btag,int *dcount,int *fcount)
   {

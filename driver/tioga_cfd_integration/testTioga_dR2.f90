@@ -19,7 +19,7 @@ program testTioga
   !
   type(grid), target, allocatable :: gr(:)
   type(grid), pointer :: g
-  integer :: myid,numprocs,ierr,nsave
+  integer :: myid,numprocs,ierr,nsave,runtime
   integer :: itime,ntimesteps,iter,nsubiter
   real*8 :: t0
   integer :: blockid
@@ -112,6 +112,9 @@ program testTioga
   !                             ..,            !< number of cells of second type
   !                             ..)            !< connectivity of the second type of cells 
   !                                            !< .. third, fourth etc
+
+runtime=2                                      !< Start loop for conn. and CFD handover 
+do t=0,runtime,1
   call tioga_preprocess_grids                  !< preprocess the grids (call again if dynamic) 
   call mpi_barrier(mpi_comm_world,ierr)
 
@@ -196,6 +199,9 @@ program testTioga
 !  write(6,"(I4,3x,E15.7)") myid,sqrt(rnorm/g%nv/g%nvar)
   call mpi_barrier(mpi_comm_world,ierr)
   call tioga_writeoutputfiles(g%nvar,'row') !< write output files, if need be
+  call system('cd ~/tioga/build/driver/output && ./extract_iblank.sh')
+  call movegrid(g)
+enddo
 
 200 continue    
   call mpi_barrier(mpi_comm_world,ierr)

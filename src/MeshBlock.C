@@ -6,6 +6,8 @@
 #include "MeshBlock.h"
 #include <cstring>
 #include <stdexcept>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 extern "C" {
   void findOBB(double *x,double xc[3],double dxc[3],double vec[3][3],int nnodes);
@@ -323,19 +325,22 @@ void MeshBlock::tagBoundary(void)
   TIOGA_FREE(iextmp1);
 }
 
-void MeshBlock::writeGridFile(int bid)
+void MeshBlock::writeGridFile(int bid, int t)       //"t" arg to write output to separate dir for each timestep (mod1)
 {
-  char fname[80];
-  char intstring[7];
+  char fname[256];   //80 to 256 (mod1)
+  char intstring[12]; // 7 to 12 (mod1)
   char hash,c;
   int i,n,j;
   int bodytag;
   FILE *fp;
   int ba;
   int nvert;
+  char dirname[120];
+  sprintf(dirname, "../build/driver/output/t%05d", t);  //Defining directory name
+  mkdir(dirname, 0777);                                //Creating new dir for each timestep
 
   sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"../build/driver/output/part%s.dat",&(intstring[1])); //Added /tioga/output to output file path
+  sprintf(fname,"%s/part%s.dat",dirname,&(intstring[1])); //Added /tioga/output to output file path
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\"\n");
@@ -406,20 +411,23 @@ void MeshBlock::writeGridFile(int bid)
   return;
 }
 
-void MeshBlock::writeCellFile(int bid)
+void MeshBlock::writeCellFile(int bid, int t)   //incl. timestep (mod1) Look at entire section
 {
-  char fname[80];
+  char fname[256];    //120 to 256 (mod1)
   char qstr[3];
-  char intstring[7];
+  char intstring[12]; //7 to 12 (mod1)
   char hash,c;
   int i,n,j;
   int bodytag;
   FILE *fp;
   int ba;
   int nvert;
+  char dirname[120];
+  sprintf(dirname,"../build/driver/output/t%05d",t);
+  mkdir(dirname,0777);
 
   sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"../build/driver/output/cell%s.dat",&(intstring[1])); //Added tioga to output file path
+  sprintf(fname,"%s/cell%s.dat",dirname,&(intstring[1])); //Added tioga to output file path
   fp=fopen(fname,"w");
   fprintf(fp, "TITLE =\"Tioga output\"\n");
   fprintf(fp, "VARIABLES = \"X\"\n");
@@ -431,10 +439,10 @@ void MeshBlock::writeCellFile(int bid)
   fprintf(fp, " Nodes=%d, Elements=%d, ZONETYPE=FEBrick\n", nnodes, ncells);
   fprintf(fp, " DATAPACKING=BLOCK\n");
   fprintf(fp, " VARLOCATION=([5]=CELLCENTERED)\n");
-  fprintf(fp, " DT=(SINGLE SINGLE SINGLE SINGLE SINGLE)\n");
-  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i]);
-  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i+1]);
-  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i+2]);
+  fprintf(fp, " DT=(DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE)\n");   //(mod2) DOuble precision edit
+  for(i=0;i<nnodes;i++) fprintf(fp,"%.16e\n",x[3*i]);         //(mod2) DOuble precision edit
+  for(i=0;i<nnodes;i++) fprintf(fp,"%.16e\n",x[3*i+1]);       //(mod2) DOuble precision edit
+  for(i=0;i<nnodes;i++) fprintf(fp,"%.16e\n",x[3*i+2]);       //(mod2) DOuble precision edit
   for(i=0;i<nnodes;i++) fprintf(fp,"%d.0\n",iblank[i]);
   for(i=0;i<ncells;i++) fprintf(fp,"%d.0\n",iblank_cell[i]);
   ba=1-BASE;
@@ -500,8 +508,8 @@ void MeshBlock::writeCellFile(int bid)
 void MeshBlock::writeFlowFile(int bid,double *q,int nvar,int type)
 {
   char fname[80];
-  char qstr[3];
-  char intstring[7];
+  char qstr[12];        //mod(1) 3 to 12 qstr used to create variable names for solution parameters
+  char intstring[12];   //mod(1) 7 to 12
   char hash,c;
   int i,n,j;
   int bodytag;
@@ -535,6 +543,12 @@ void MeshBlock::writeFlowFile(int bid,double *q,int nvar,int type)
   fprintf(fp,"\n");
   fprintf(fp,"ZONE T=\"VOL_MIXED\",N=%d E=%d ET=BRICK, F=FEPOINT\n",nnodes,
 	  ncells);
+
+fprintf(fp, " DT=(DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE");    //mod(2) Writing flow file in double precision
+for(i=0;i<nvar;i++) {  
+    fprintf(fp, " DOUBLE");  
+}   
+fprintf(fp, ")\n");                                        //mod(2) Writing flow file in double precision
 
   if (type==0)
     {
@@ -1109,7 +1123,7 @@ void MeshBlock::getQueryPoints2(OBB *obc,
 void MeshBlock::writeOBB(int bid)
 {
   FILE *fp;
-  char intstring[7];
+  char intstring[12];    ////7 to 12 (mod1)
   char fname[80];
   int l,k,j,m,il,ik,ij;
   REAL xx[3];

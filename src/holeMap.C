@@ -182,7 +182,7 @@ void tioga::outputHoleMap(void)
   int ii,jj,kk,m;
   FILE *fp;
   double ds[3];
-  char intstring[7];
+  char intstring[12];    //mod(1) 7 to 12
   char fname[80];
 
   for(i=0;i<nmesh;i++)

@@ -145,7 +145,7 @@ void MeshBlock::getUnresolvedMandatoryReceptors(void)
 void MeshBlock::writeOBB2(OBB * obc, int bid)
 {
   FILE *fp;
-  char intstring[7];
+  char intstring[12];   //increased from 7 to 12 (mod1)
   char fname[80];
   int l,k,j,m,il,ik,ij;
   REAL xx[3];
