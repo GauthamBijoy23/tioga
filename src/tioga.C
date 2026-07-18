@@ -870,3 +870,13 @@ void tioga::reduce_fringes(void)
   //if (myid==4) mb->writeOutput(myid);
   //if (myid==4) mb->writeOBB(myid);
 }
+//only iblank cell output (mod5)
+void tioga::getIblankCell(int btag, int *iblank_cell_out, int *ncells_out)
+{
+  for (int ib = 0; ib < nblocks; ib++)
+    if (mblocks[ib]->getMeshTag() == btag) {
+      mblocks[ib]->getIblankCell(iblank_cell_out, ncells_out);
+      return;
+    }
+  printf("tioga::getIblankCell: btag %d not found\n", btag);
+}

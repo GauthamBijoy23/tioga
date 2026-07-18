@@ -181,7 +181,7 @@ do j=1,127
 enddo
 !
 !
-open(unit=103, file='../driver/header_debug.txt', status='replace')  ! WRITING to HEADER_DEBUG
+open(unit=103, file='/home/gautham_linux/tioga/driver/header_debug.txt', status='replace')  ! WRITING to HEADER_DEBUG
 write(103,*) '=== TIOGA Header Debug ==='
 write(103,*) 'Parsed header values:'  
 write(103,*) 'g%nv (N) =', g%nv  
@@ -199,7 +199,7 @@ g%nghost=0
 g%ndof=g%ncells+g%nghost
 !
 !
-open(unit=102, file='../driver/allocation_debug.txt', status='replace')  !WRITING TO ALLOCATION_DEBUG  
+open(unit=102, file='/home/gautham_linux/tioga/driver/allocation_debug.txt', status='replace')  !WRITING TO ALLOCATION_DEBUG  
 write(102,*) '=== TIOGA Allocation Debug ==='  
 write(102,*) 'Number of nodes (g%nv):', g%nv  
 write(102,*) 'Number of cells (g%ncells):', g%ncells  

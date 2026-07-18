@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <cmath>
 
 extern "C" {
   void findOBB(double *x,double xc[3],double dxc[3],double vec[3][3],int nnodes);
@@ -628,12 +629,12 @@ fprintf(fp, ")\n");                                        //mod(2) Writing flow
 	    }
 	}
     }
-  fprintf(fp,"%d\n",nwbc);
-  for(i=0;i<nwbc;i++)
-    fprintf(fp,"%d\n",wbcnode[i]);
-  fprintf(fp,"%d\n",nobc);
-  for(i=0;i<nobc;i++)
-    fprintf(fp,"%d\n",obcnode[i]);
+  //fprintf(fp,"%d\n",nwbc);
+  //for(i=0;i<nwbc;i++)
+  //  fprintf(fp,"%d\n",wbcnode[i]);
+  //fprintf(fp,"%d\n",nobc);
+  //for(i=0;i<nobc;i++)
+  //  fprintf(fp,"%d\n",obcnode[i]);
   fclose(fp);
   return;
 }
@@ -1409,5 +1410,77 @@ void MeshBlock::create_hex_cell_map(void)
          idx[j]=xd[j]/dx[j];
 	}
        uindx[idx[2]*idims[1]*idims[0]+idx[1]*idims[0]+idx[0]]=i;
+    }
+}
+void MeshBlock::getCellqvals(double *q,
+                             double *qcell,
+                             int nvar,
+                             bool weighted)
+{
+    int cellid = 0;
+
+    for (int n = 0; n < ntypes; n++)
+    {
+        int nvert = nv[n];
+
+        for (int i = 0; i < nc[n]; i++)
+        {
+            for (int v = 0; v < nvar; v++)
+                qcell[cellid*nvar + v] = 0.0;
+
+            if (!weighted)
+            {
+                for (int m = 0; m < nvert; m++)
+                {
+                    int inode = vconn[n][nvert*i + m] - BASE;
+
+                    for (int v = 0; v < nvar; v++)
+                        qcell[cellid*nvar + v] += q[inode*nvar + v];
+                }
+
+                for (int v = 0; v < nvar; v++)
+                    qcell[cellid*nvar + v] /= (double)nvert;
+            }
+            else
+            {
+                double xc = 0.0, yc = 0.0, zc = 0.0;
+
+                for (int m = 0; m < nvert; m++)
+                {
+                    int inode = vconn[n][nvert*i + m] - BASE;
+
+                    xc += x[3*inode];
+                    yc += x[3*inode + 1];
+                    zc += x[3*inode + 2];
+                }
+
+                xc /= nvert;
+                yc /= nvert;
+                zc /= nvert;
+
+                double wsum = 0.0;
+
+                for (int m = 0; m < nvert; m++)
+                {
+                    int inode = vconn[n][nvert*i + m] - BASE;
+
+                    double dx = x[3*inode]     - xc;
+                    double dy = x[3*inode + 1] - yc;
+                    double dz = x[3*inode + 2] - zc;
+
+                    double w = 1.0 / sqrt(dx*dx + dy*dy + dz*dz);
+
+                    wsum += w;
+
+                    for (int v = 0; v < nvar; v++)
+                        qcell[cellid*nvar + v] += w*q[inode*nvar + v];
+                }
+
+                for (int v = 0; v < nvar; v++)
+                    qcell[cellid*nvar + v] /= wsum;
+            }
+
+            cellid++;
+        }
     }
 }

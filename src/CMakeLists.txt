@@ -12,7 +12,6 @@ set(TIOGA_SOURCES
   math.c
   get_amr_index_xyz.c
   utils.c
-
   # CXX sources
   ADT.C
   CartBlock.C

@@ -19,7 +19,11 @@
 // 02/24/2014
 //
 extern "C" {
-
+//Only iblank cell output (mod5)
+void tioga_getiblank_cell_(int *btag, int *iblank_cell_out, int *ncells_out)
+{
+  tg->getIblankCell(*btag, iblank_cell_out, ncells_out);
+}
   void tioga_init_f90_(int *scomm)
   {
     int id_proc,nprocs;

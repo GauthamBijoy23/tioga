@@ -161,3 +161,9 @@ void MeshBlock::getReceptorInfo(int *receptors)
     k += 2;
   }
 }
+void MeshBlock::getIblankCell(int *iblank_cell_out, int *ncells_out)
+{
+  *ncells_out = ncells;
+  for (int i = 0; i < ncells; i++)
+    iblank_cell_out[i] = iblank_cell[i];
+}

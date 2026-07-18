@@ -95,6 +95,7 @@ class MeshBlock
   int *donorIdCart;
   int donorListLength;
 
+void getIblankCell(int *iblank_cell_out, int *ncells_out); //To output only iblank cell (mod5)
   int nfringe;
   int mexclude;
   int meshtag; /** < tag of the mesh that this block belongs to */
@@ -297,7 +298,10 @@ class MeshBlock
   void getUnresolvedMandatoryReceptors();
   void getCartReceptors(CartGrid *cg, parallelComm *pc);
   void setCartIblanks(void);
-  
+  void getCellqvals(double *q,       //Method to calculate cell centre qvals
+                    double *qcell,
+                    int nvar,
+                    bool weighted);
   // Getters
   inline int getMeshTag() const { return meshtag + (1 - BASE); }
 

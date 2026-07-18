@@ -3,6 +3,7 @@ set(TIOGA_EXE_SOURCES
   modules.f90
   gridutils.f90
   poisson_utils.f90
+  run_tioga.f90
   )
 
 add_library(tiogadriver ${TIOGA_EXE_SOURCES})

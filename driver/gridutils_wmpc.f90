@@ -149,7 +149,7 @@ type(grid), intent(inout) :: g
 !
 character*128 :: a
 character*1 :: hash
-integer :: i,junk,j,m,k,btagTemp,N,E
+integer :: i,junk,j,m,k,btagTemp
 real*8 :: rho,u,v,w,p,e,xx,yy,zz,rhoinf,pinf,uinf,qj,xmin,ymin,zmin,xtemp,ytemp,ztemp
 real*8 :: fac,rsq,xmax,ymax,zmax
 real*8 :: SIXTH=1./6
@@ -158,22 +158,30 @@ logical :: file_exists
 !
 open(unit=101,file=fname,form='formatted')
 !
-do
-   read(101,*)N,E 
+do i=1,3
+   read(101,"(A128)") a
 enddo
-g%nv=N
-g%ncells=E
+do j=1,127
+   if (a(j:j+1).eq.'N=' ) then
+      k=j+2
+      do while(a(k:k).ne.' ')
+         k=k+1
+      enddo
+      read(a(j+2:k),*) g%nv
+   endif
+enddo                               !Split parsing for N and E values into two 
+do j=1,127
+   if (a(j:j+1).eq.'E=') then
+      k=j+2
+     do while(a(k:k).ne.' ')
+        k=k+1
+     enddo
+     read(a(j+2:k),*) g%ncells
+   endif
+enddo
 !
 !
-open(unit=103, file='../driver/header_debug.txt', status='replace')  ! WRITING to HEADER_DEBUG
-write(103,*) '=== TIOGA Header Debug ==='
-write(103,*) 'Parsed header values:'  
-write(103,*) 'g%nv (N) =', g%nv  
-write(103,*) 'g%ncells (E) =', g%ncells 
-flush(103)             ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
-close(103)
-!
-!
+write(*,*)"N=",g%nv,"  E=",g%ncells
 g%n4=g%nCells !all cells are tet
 g%n6=0
 g%n8=0
@@ -181,30 +189,6 @@ g%nmax=8
 g%nvar=1
 g%nghost=0
 g%ndof=g%ncells+g%nghost
-!
-!
-open(unit=102, file='../driver/allocation_debug.txt', status='replace')  !WRITING TO ALLOCATION_DEBUG  
-write(102,*) '=== TIOGA Allocation Debug ==='  
-write(102,*) 'Number of nodes (g%nv):', g%nv  
-write(102,*) 'Number of cells (g%ncells):', g%ncells  
-write(102,*) 'Number of tetrahedral cells (g%n4):', g%n4  
-write(102,*) 'Degrees of freedom (g%ndof):', g%ndof  
-write(102,*) 'Number of variables (g%nvar):', g%nvar  
-write(102,*) ''  
-write(102,*) 'Array sizes to be allocated:'  
-write(102,*) 'g%x (coordinates):', 3*g%nv, 'elements'  
-write(102,*) 'g%bodytag:', g%nv, 'elements'  
-write(102,*) 'g%iblank:', g%nv, 'elements'  
-write(102,*) 'g%scal:', g%nvar, 'elements'  
-write(102,*) 'g%xcentroid:', 3*g%ndof, 'elements'  
-write(102,*) 'g%q:', g%nvar*g%nv, 'elements'  
-write(102,*) 'g%dq:', 3*g%nvar*g%nv, 'elements'  
-write(102,*) ''  
-write(102,*) 'Estimated memory usage (bytes):'  
-write(102,*) 'Total double precision arrays:', (3*g%nv + 3*g%ndof + g%nvar*g%nv + 3*g%nvar*g%nv)*8  
-write(102,*) 'Total integer arrays:', (g%nv + g%nv)*4  
-flush (102)                              ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
-close(102)
 !
 !
 allocate(g%x(3*g%nv),g%bodytag(g%nv),g%iblank(g%nv))
@@ -222,27 +206,27 @@ rhoinf=1.
 uinf=0.5
 pinf=1/1.4
 !
-xmin = 1.0d15     ! X,Y,Z min values initalised as very high numbers. MAKE SURE they are high enough.
-ymin = 1.0d15
-zmin = 1.0d15
-xmax = 1.0d-15
-ymax = 1.0d-15
-zmax = 1.0d-15
-do i=1,g%nv
-   read(101,*) g%x(3*i-2),g%x(3*i-1),g%x(3*i),g%bodytag(i) !,qj
-   xtemp = g%x(3*i-2)
-   ytemp = g%x(3*i-1)
-   ztemp = g%x(3*i)
-   btagTemp = g%bodytag(i) - 1
-   if (xtemp<xmin) xmin = xtemp     !! ------ Compare each x,y,z value with min and if smaller replace.
-   if (ytemp<ymin) ymin = ytemp
-   if (ztemp<zmin) zmin = ztemp
-   if (xtemp>xmax) xmax = xtemp
-   if (ytemp>ymax) ymax = ytemp
-   if (ztemp>zmax) zmax = ztemp 
-enddo
-print*,"xmax,ymax,zmax,btag",xmax,ymax,zmax,btagTemp
-print*,"xmin,ymin,zmin,btag",xmin,ymin,zmin,btagTemp
+!xmin = 1.0d15     ! X,Y,Z min values initalised as very high numbers. MAKE SURE they are high enough.
+!ymin = 1.0d15
+!zmin = 1.0d15
+!xmax = 1.0d-15
+!ymax = 1.0d-15
+!zmax = 1.0d-15
+!do i=1,g%nv
+!   read(101,*) g%x(3*i-2),g%x(3*i-1),g%x(3*i),g%bodytag(i) !,qj
+!   xtemp = g%x(3*i-2)
+!   ytemp = g%x(3*i-1)
+!   ztemp = g%x(3*i)
+!   btagTemp = g%bodytag(i) - 1
+!   if (xtemp<xmin) xmin = xtemp     !! ------ Compare each x,y,z value with min and if smaller replace.
+!   if (ytemp<ymin) ymin = ytemp
+!   if (ztemp<zmin) zmin = ztemp
+!   if (xtemp>xmax) xmax = xtemp
+!   if (ytemp>ymax) ymax = ytemp
+!   if (ztemp>zmax) zmax = ztemp 
+!enddo
+!print*,"xmax,ymax,zmax,btag",xmax,ymax,zmax,btagTemp
+!print*,"xmin,ymin,zmin,btag",xmin,ymin,zmin,btagTemp
 g%scal=1
 !
 !allocate(g%ndc6(6,g%n6),g%ndc8(8,g%n8))
@@ -358,3 +342,4 @@ enddo
 !
 return
 end subroutine moveGrid
+

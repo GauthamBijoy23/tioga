@@ -144,6 +144,7 @@ class tioga
   
   void getDonorInfo(int btag, int *receptors,int *indices,double *frac,int *dcount);
 
+void getIblankCell(int btag, int *iblank_cell_out, int *ncells_out);  //only iblank output (mod5)
   void getReceptorInfo(std::vector<int>&);
 
   /** set symmetry bc */
