@@ -15,6 +15,9 @@ extern "C"
   int checkHoleMap(double *x,int *nx,int *sam,double *extents);
 }
 
+extern "C" { int tioga_cb_meshtag = 0; }      //Global var referencing meshtag
+                                              // to be used in high order cell based interpolation  (mod10f)
+
 void MeshBlock::getCellIblanks2(void)
 {
   int i;
@@ -192,6 +195,8 @@ void MeshBlock::clearOrphans(HOLEMAP *holemap, int nmesh,int *itmp)
 
 void MeshBlock::getInternalNodes(void)
 {
+  tioga_cb_meshtag = meshtag;         //Added as part of global mesh identity (for high order cell based interp) (mod10f)
+
   int i,m,j,icell,indx,isum,i3,n,nvert;
   //
   nreceptorCells=0;
@@ -305,6 +310,8 @@ void MeshBlock::getExtraQueryPoints(OBB *obc,
 
 void MeshBlock::processPointDonors(void)
 {
+  tioga_cb_meshtag = meshtag;   //Global meshtag var (part of highorder cell based interp) (mod10f)
+
   int i,j,m,n;
   int isum,nvert,i3,ivert;
   double *frac;
@@ -506,6 +513,8 @@ void MeshBlock::getInterpolatedSolutionAtPoints(int *nints,int *nreals,int **int
 	
 void MeshBlock::updatePointData(double *q,double *qtmp,int nvar,int interptype)  
 {
+  tioga_cb_meshtag = meshtag;   //Global meshtag var (part of highorder cell based interp) (mod10f)
+
   int i,j,k,n,m;
   double *qout;
   int index_out;

@@ -15,6 +15,9 @@ extern "C" {
   void uniquenodes_octree(double *x,int *meshtag,double *rtag,int *itag,int *nn);
 }
 
+extern "C" { extern int tioga_cb_meshtag; }    //Added global mesh var to use in high order cell based interpolation
+                                               //defined and added to Meshblock operations in highOrder.C  (mod10f)
+
 namespace {
 
 /** Determine the unique nodes by a global identifier
@@ -62,6 +65,8 @@ void uniquenode_map(uint64_t* node_ids, double* node_res, int* itag, int nnodes)
 
 void MeshBlock::search(void)
 {
+  tioga_cb_meshtag = meshtag;    //Global meshtag var. (mod10f)
+
   int i,j,k,l,m,n,p,i3;
   int ndim;
   int iptr,isum,nvert;

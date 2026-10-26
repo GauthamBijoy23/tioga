@@ -181,15 +181,6 @@ do j=1,127
 enddo
 !
 !
-open(unit=103, file='/home/gautham_linux/tioga/driver/header_debug.txt', status='replace')  ! WRITING to HEADER_DEBUG
-write(103,*) '=== TIOGA Header Debug ==='
-write(103,*) 'Parsed header values:'  
-write(103,*) 'g%nv (N) =', g%nv  
-write(103,*) 'g%ncells (E) =', g%ncells 
-flush(103)             ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
-close(103)
-!
-!
 g%n4=g%nCells !all cells are tet
 g%n6=0
 g%n8=0
@@ -197,30 +188,6 @@ g%nmax=8
 g%nvar=1
 g%nghost=0
 g%ndof=g%ncells+g%nghost
-!
-!
-open(unit=102, file='/home/gautham_linux/tioga/driver/allocation_debug.txt', status='replace')  !WRITING TO ALLOCATION_DEBUG  
-write(102,*) '=== TIOGA Allocation Debug ==='  
-write(102,*) 'Number of nodes (g%nv):', g%nv  
-write(102,*) 'Number of cells (g%ncells):', g%ncells  
-write(102,*) 'Number of tetrahedral cells (g%n4):', g%n4  
-write(102,*) 'Degrees of freedom (g%ndof):', g%ndof  
-write(102,*) 'Number of variables (g%nvar):', g%nvar  
-write(102,*) ''  
-write(102,*) 'Array sizes to be allocated:'  
-write(102,*) 'g%x (coordinates):', 3*g%nv, 'elements'  
-write(102,*) 'g%bodytag:', g%nv, 'elements'  
-write(102,*) 'g%iblank:', g%nv, 'elements'  
-write(102,*) 'g%scal:', g%nvar, 'elements'  
-write(102,*) 'g%xcentroid:', 3*g%ndof, 'elements'  
-write(102,*) 'g%q:', g%nvar*g%nv, 'elements'  
-write(102,*) 'g%dq:', 3*g%nvar*g%nv, 'elements'  
-write(102,*) ''  
-write(102,*) 'Estimated memory usage (bytes):'  
-write(102,*) 'Total double precision arrays:', (3*g%nv + 3*g%ndof + g%nvar*g%nv + 3*g%nvar*g%nv)*8  
-write(102,*) 'Total integer arrays:', (g%nv + g%nv)*4  
-flush (102)                              ! ADDED FLUSH TO WRITE FILES IMMEDIATELY
-close(102)
 !
 !
 allocate(g%x(3*g%nv),g%bodytag(g%nv),g%iblank(g%nv))
