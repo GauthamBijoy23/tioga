@@ -144,6 +144,9 @@ class tioga
   
   void getDonorInfo(int btag, int *receptors,int *indices,double *frac,int *dcount);
 
+void getDonorCount2(int btag, int *dcount, int *fcount);                      //for cell based interp (mod10j)
+void getDonorInfo2(int btag, int *receptors, int *indices, double *frac);     //for cell based interp (mod10j)
+
 void getIblankCell(int btag, int *iblank_cell_out, int *ncells_out);  //only iblank output (mod5)
   void getReceptorInfo(std::vector<int>&);
 

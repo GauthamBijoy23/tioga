@@ -72,6 +72,27 @@ void MeshBlock::getCellIblanks2(void)
     }
 }
 
+void MeshBlock::getDonorCount2(int *dcount, int *fcount)                     //Adding for cell based interpolation (mod10j)
+{
+  *dcount = ninterp2; *fcount = 0;
+  for (int i = 0; i < ninterp2; i++) *fcount += interpList2[i].nweights;
+}
+
+void MeshBlock::getDonorInfo2(int *receptors, int *indices, double *frac)  // Adding for cell based interpolation (mod10h)
+{
+  int j = 0, k = 0;
+  for (int i = 0; i < ninterp2; i++) {
+    for (int m = 0; m < interpList2[i].nweights; m++) {
+      indices[j] = interpList2[i].inode[m];
+      frac[j]    = interpList2[i].weights[m];
+      j++;
+    }
+    receptors[k++] = interpList2[i].receptorInfo[0];
+    receptors[k++] = interpList2[i].receptorInfo[1];
+    receptors[k++] = interpList2[i].receptorInfo[2];
+    receptors[k++] = interpList2[i].nweights;
+  }
+}
 
 void MeshBlock::getCellIblanks(void)
 {

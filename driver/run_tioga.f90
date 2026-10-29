@@ -123,36 +123,43 @@ subroutine cb_to_modal(cell, npts_in, qtmp, npts, index_out, qout)
 end subroutine
 
 subroutine cb_write_donormap()
-  integer :: ib, d, m, nw, dc, fc, rb, coff(nblocks+1), rg, dg1, dg2
-  integer, allocatable :: ri(:), ino(:)
+  integer :: ib, d, dc, fc, rb, e, u, nfr, rcell, dcell
+  integer :: coff(nblocks+1), fstart(nblocks+1)
+  integer, allocatable :: ri(:), ino(:), fcell(:)
   real(8), allocatable :: fr(:)
   coff(1) = 0
   do ib = 1, nblocks
     coff(ib+1) = coff(ib) + gr(ib)%ncells
   end do
-  open(25, file='checking_nodes/donorinfo_cell.dat', status='replace')
-  write(25,*) '# rank rec_idx rec_ib nw | inode(1:nw+1) | frac(1:nw+1) | rec_glob don_glob(from inode1) don_glob(from inode2)  [all global ids 1-based]'
+  allocate(fcell(nc_t)); nfr = 0; fstart(1) = 1
   do ib = 1, nblocks
-    call tioga_getdonorcount(gr(ib)%bodytag(1), dc, fc)
-    write(25,*) 'Block Num=', gr(ib)%bodytag(1), 'Donor Count=', dc, 'Fcount=', fc
+    do e = coff(ib)+1, coff(ib+1)
+      if (iblankcells(e) == -1) then
+        nfr = nfr + 1; fcell(nfr) = e
+      end if
+    end do
+    fstart(ib+1) = nfr + 1
+  end do
+  open(newunit=u, file='checking_nodes/donorinfo_cell.dat', status='replace')
+  write(u,*) '# rank rec_pt rec_ib nw | donor_offset weight | rec_cell don_cell (global, 1-based)'
+  do ib = 1, nblocks
+    call tioga_getdonorcount2(gr(ib)%bodytag(1), dc, fc)
+    write(u,*) 'Block Num=', gr(ib)%bodytag(1), 'Donor Count=', dc, 'Fcount=', fc
     if (dc == 0) cycle
+    if (fc /= dc) stop 'donormap: expected nweights = 1'
     allocate(ri(4*dc), ino(fc), fr(fc))
-    call tioga_getdonorinfo(gr(ib)%bodytag(1), ri, ino, fr, dc)
-    m = 0
+    call tioga_getdonorinfo2(gr(ib)%bodytag(1), ri, ino, fr)
     do d = 1, dc
-      nw = ri(4*d)
-      rb = ri(4*d-1)
-      rg  = coff(rb+1) + ri(4*d-2) + 1
-      dg1 = coff(ib) + (ino(m+1)-1)/cb_neq + 1
-      dg2 = coff(ib) + ino(m+nw+1) + 1
-      write(25,*) ri(4*d-3:4*d), ino(m+1:m+nw+1), fr(m+1:m+nw+1), rg, dg1, dg2
-      m = m + nw + 1
+      rb    = ri(4*d-1) + 1
+      rcell = fcell(fstart(rb) + ri(4*d-2))
+      dcell = coff(ib) + (ino(d)-1)/cb_neq + 1
+      write(u,*) ri(4*d-3:4*d), ino(d), fr(d), rcell, dcell
     end do
     deallocate(ri, ino, fr)
   end do
-  close(25)
+  close(u)
+  deallocate(fcell)
 end subroutine
-
 !-----------------------CALLBACKS OVER-------------------------------
 
 subroutine tioga_cell_conn(neq_in)

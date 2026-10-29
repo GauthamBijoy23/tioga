@@ -556,6 +556,20 @@ void tioga::getDonorInfo(int btag,int *receptors,int *indices,double *frac,int *
       
 }
 
+void tioga::getDonorCount2(int btag, int *dcount, int *fcount)    //for cell based interp (mod10j)
+{
+  auto idxit = tag_iblk_map.find(btag);
+  int iblk = idxit->second;
+  mblocks[iblk]->getDonorCount2(dcount, fcount);
+}
+
+void tioga::getDonorInfo2(int btag, int *receptors, int *indices, double *frac)  //for cell based interp (mod10j)
+{
+  auto idxit = tag_iblk_map.find(btag);
+  int iblk = idxit->second;
+  mblocks[iblk]->getDonorInfo2(receptors, indices, frac);
+}
+
 void tioga::getReceptorInfo(std::vector<int>& receptors)
 {
   int nsend, nrecv;

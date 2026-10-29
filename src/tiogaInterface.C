@@ -238,6 +238,15 @@ void tioga_getiblank_cell_(int *btag, int *iblank_cell_out, int *ncells_out)
   {
     tg->getDonorInfo(*btag,receptors,indices,frac,dcount);
   }
+    void tioga_getdonorcount2_(int *btag, int *dcount, int *fcount)    //for cell based interp (mod10j)
+  {
+    tg->getDonorCount2(*btag, dcount, fcount);
+  }
+  void tioga_getdonorinfo2_(int *btag, int *receptors, int *indices, double *frac)
+  {
+    tg->getDonorInfo2(*btag, receptors, indices, frac);
+  }                                                                   // mod10j end
+
   void tioga_getreceptorinfo_(int *btag,int *receptors,int *rcount)
   {
     std::vector<int>rvec;

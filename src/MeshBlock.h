@@ -208,7 +208,8 @@ void getIblankCell(int *iblank_cell_out, int *ncells_out); //To output only ibla
 		      double **realData);
   void getQueryPoints(OBB *obb,int *nints,int **intData,int *nreals,
 		      double **realData);
-  
+void getDonorCount2(int *dcount, int *fcount);                   /**Adding for cell based route (mod10j?)*/
+void getDonorInfo2(int *receptors, int *indices, double *frac);
 
   /** routines that do book keeping */
 
